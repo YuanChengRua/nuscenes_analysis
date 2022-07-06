@@ -1268,6 +1268,7 @@ class NuScenesExplorer:
         if sensor_modality in ['lidar', 'radar']:
             sample_rec = self.nusc.get('sample', sd_record['sample_token'])
             chan = sd_record['channel']
+            # ref_chan = 'LIDAR_TOP'
             ref_chan = 'LIDAR_TOP'
             ref_sd_token = sample_rec['data'][ref_chan]
             ref_sd_record = self.nusc.get('sample_data', ref_sd_token)
@@ -1289,9 +1290,9 @@ class NuScenesExplorer:
                     pcl_path = osp.join(self.nusc.dataroot, ref_sd_record['filename'])
                     pc = LidarPointCloud.from_file(pcl_path)
                 else:
-                    # Get aggregated lidar point cloud in lidar frame.
+                #     # Get aggregated lidar point cloud in lidar frame.
                     pc, times = LidarPointCloud.from_file_multisweep(self.nusc, sample_rec, chan, ref_chan,
-                                                                     nsweeps=nsweeps)
+                                                                      nsweeps=nsweeps)
                 velocities = None
             else:
                 # Get aggregated radar point cloud in reference frame.
