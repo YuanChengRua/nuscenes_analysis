@@ -76,7 +76,13 @@ class PointCloud(ABC):
         """
         # Init.
         points = np.zeros((cls.nbr_dims(), 0), dtype=np.float32 if cls == LidarPointCloud else np.float64)
-        all_pc = cls(points)
+        pointsensor_token = sample_rec['data'][chan]
+        pointsensor = nusc.get('sample_data', pointsensor_token)
+        pcl_path = osp.join(nusc.dataroot, pointsensor['filename'])
+        if chan.startswith('RADAR'):
+          all_pc = RadarPointCloud.from_file(pcl_path, invalid_states=list(range(16)), dynprop_states=list(range(8)),ambig_states=list(range(5)))
+        else:
+          all_pc = cls(points)
         all_times = np.zeros((1, 0))
 
         # Get reference pose and timestamp.
@@ -121,7 +127,8 @@ class PointCloud(ABC):
             all_times = np.hstack((all_times, times))
 
             # Merge with key pc.
-            all_pc.points = np.hstack((all_pc.points, current_pc.points))
+            if chan.startswith('LIDAR'):
+              all_pc.points = np.hstack((all_pc.points, current_pc.points))
 
             # Abort if there are no previous sweeps.
             if current_sd_rec['prev'] == '':
